@@ -1,0 +1,512 @@
+name: kaggle
+version: 1.0.0
+kind: compute
+
+dependencies:
+  - python3
+  - python3-yaml
+  - python3-pip
+
+install:
+  - pip3 install kaggle
+
+files:
+  - run.py
+
+entrypoint:
+  kind: task
+  exec: run.py
+
+
+types:
+  KaggleCredentials:
+    name: KaggleCredentials
+    properties:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+
+  DebugAuthOutput:
+    name: DebugAuthOutput
+    properties:
+      - name: error
+        optional: true
+        type: string
+      - name: kaggle_key
+        type: string
+      - name: kaggle_username
+        type: string
+      - name: success
+        type: boolean
+      
+actions:
+  'debug auth':
+    command:
+      args: [debug, auth]
+    input:
+      - name: credentials
+        type: KaggleCredentials
+    output:
+      - name: output
+        type: string
+      
+  'list competitions':
+    command:
+      args: [competitions, list]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      - name: competition
+        type: string
+      - name: group
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: category
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: sort_by
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: page
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: search
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list competition files':
+    command:
+      args: [competitions, files]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'download competition':
+    command:
+      args: [competitions, download]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      - name: competition
+        type: string
+      - name: destination
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'submit competition':
+    command:
+      args: [competitions, submit]
+    input:
+      - name: filename
+        type: string
+      - name: competition
+        type: string
+      - name: message
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: quiet
+        type: boolean
+        optional: true
+        default:
+          v: boolean
+          c: false
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list competition submissions':
+    command:
+      args: [competitions, submissions]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list competition leaderboard':
+    command:
+      args: [competitions, download]
+    input:
+      - name: competition
+        type: string
+      - name: download
+        type: boolean
+        optional: true
+        default:
+          v: boolean
+          c: false
+      - name: quiet
+        type: boolean
+        optional: true
+        default:
+          v: boolean
+          c: false
+      - name: destination
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list dataset':
+    command:
+      args: [datasets, list]
+    input:
+      - name: sort_by
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: size
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: file_type
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: license_name
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: tags_ids
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: search
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: user
+        type: string
+        optional: true
+        default:
+          v: unicode
+          c: ""
+      - name: mine
+        type: string
+        optional: true
+        default:
+          v: integer
+          c: 0
+      - name: page
+        type: integer
+        optional: true
+        default:
+          v: integer
+          c: 0
+      - name: max_size
+        type: integer
+        optional: true
+        default:
+          v: integer
+          c: 0
+      - name: min_size
+        type: integer
+        optional: true
+        default:
+          v: integer
+          c: 0
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list dataset files':
+    command:
+      args: [datasets, files]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'download dataset':
+    command:
+      args: [datasets, download]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'create dataset':
+    command:
+      args: [datasets, create]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'version dataset':
+    command:
+      args: [datasets, version]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'init dataset':
+    command:
+      args: [datasets, init]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list dataset metadata':
+    command:
+      args: [datasets, metadata]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list dataset status':
+    command:
+      args: [datasets, status]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'list kernels':
+    command:
+      args: [kernels, list]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'init kernel':
+    command:
+      args: [kernels, init]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'push kernel':
+    command:
+      args: [kernels, push]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'pull kernel':
+    command:
+      args: [kernels, pull]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'kernel output':
+    command:
+      args: [kernels, output]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
+
+  'kernel status':
+    command:
+      args: [kernels, status]
+    input:
+      - name: competition
+        type: string
+    output:
+      - name: success
+        type: boolean
+      - name: output
+        type: string
+      - name: error
+        type: string
+      - name: error
+        type: string
