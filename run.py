@@ -3,11 +3,11 @@ import base64
 import traceback
 import os
 import sys
+import json
 import yaml
-import kaggle
 
+from pprint import pprint
 from functools import wraps
-from kaggle.api.kaggle_api_extended import KaggleApi
 
 """
 implemented kaggle API wrappers
@@ -19,12 +19,31 @@ not covered by this package as of now
     - config {view, set, unset}
 """
 
+KAGGLE_USERNAME = "CREDENTIALS_KAGGLE_USERNAME"
+KAGGLE_KEY = "CREDENTIALS_KAGGLE_KEY"
+DEBUG = os.environ.get("DEBUG") is not None
+
 
 def _is_set(val):
     return str(val).lower() in ["y", "yes", "true", "t"]
 
 
-def authenticate():
+def create_kaggle_json_file(username, key):
+    kaggle_json = {"username": username, "key": key}
+    kaggle_json_file = os.path.join(os.environ["HOME"], ".kaggle/kaggle.json")
+    os.makedirs(os.path.dirname(kaggle_json_file), exist_ok=True)
+    if not os.path.exists(kaggle_json_file):
+        with open(kaggle_json_file, "w+") as f:
+            f.write(json.dumps(kaggle_json))
+    os.chmod(kaggle_json_file, 0o600)
+
+
+def authenticate(env):
+    create_kaggle_json_file(
+        username=env.get(KAGGLE_USERNAME, ""), key=env.get(KAGGLE_KEY, "")
+    )
+    from kaggle.api.kaggle_api_extended import KaggleApi
+
     api = KaggleApi()
     api.authenticate()
     return api
@@ -36,6 +55,8 @@ def wrap_error(f):
         try:
             return True, f(*args, **kwargs), ""
         except Exception as e:
+            if DEBUG:
+                raise
             trace = traceback.format_exc()
             return False, None, trace
 
@@ -72,8 +93,16 @@ def download_competition(api, env):
     if competition is None:
         raise ValueError("must specify competition")
     # optional
-    dest = env.get("DESTINATION")
-    return api.competition_download_files(competition, path=dest)
+    dest = os.path.realpath(env.get("DESTINATION", "."))
+    force = _is_set(env.get("FORCE", ""))
+    quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
+    if DEBUG:
+        print(
+            "downloading %s to %s (force=%s quiet=%s)"
+            % (competition, dest, force, quiet)
+        )
+    api.competition_download_files(competition, path=dest, force=force, quiet=quiet)
 
 
 @wrap_error
@@ -87,6 +116,7 @@ def submit_competition(api, env):
     # optional
     message = env.get("MESSAGE", "")
     quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
     return api.competition_submit(
         file_name=file_name, message=message, competition=competition, quiet=quiet
     )
@@ -109,6 +139,7 @@ def competition_leaderboard(api, env):
     # optional
     download = _is_set(env.get("DOWNLOAD", ""))
     quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
     dest = env.get("DESTINATION")
 
     if download:
@@ -168,6 +199,7 @@ def download_dataset(api, env):
     unzip = _is_set(env.get("UNZIP", ""))
     force = _is_set(env.get("FORCE", ""))
     quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
 
     if file_name is None:
         api.dataset_download_files(
@@ -186,6 +218,7 @@ def create_dataset(api, env):
     # optional
     public = _is_set(env.get("PUBLIC", ""))
     quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
     convert_to_csv = _is_set(env.get("CONVERT_TO_CSV", ""))
     dir_mode = env.get("DIR_MODE")
 
@@ -204,6 +237,7 @@ def dataset_version(api, env):
     # optional
     version_notes = env.get("VERSION_NOTES")
     quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
     convert_to_csv = _is_set(env.get("CONVERT_TO_CSV", ""))
     delete_old_versions = _is_set(env.get("DELETE_OLD_VERSIONS", ""))
     dir_mode = env.get("DIR_MODE")
@@ -303,6 +337,7 @@ def pull_kernel(api, env):
     dest = env.get("DESTINATION")
     metadata = env.get("METADATA")
     quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
 
     return api.kernels_pull(kernel, path=dest, metadata=metadata, quiet=quiet)
 
@@ -315,6 +350,7 @@ def kernel_output(api, env):
     dest = env.get("DESTINATION")
     force = _is_set(env.get("FORCE", ""))
     quiet = _is_set(env.get("QUIET", ""))
+    quiet = True
 
     return api.kernels_output(kernel, path=dest, force=force, quiet=quiet)
 
@@ -329,19 +365,24 @@ def kernel_status(api, env):
 
 @wrap_error
 def debug_auth(api, env):
-    return dict()
     return dict(
-        kaggle_username=env.get("KAGGLE_USERNAME"), kaggle_key=env.get("KAGGLE_KEY")
+        kaggle_username=env.get(KAGGLE_USERNAME, ""),
+        kaggle_key=env.get(KAGGLE_KEY, ""),
     )
 
-if __name__ == "__main__":
-    print(yaml.dump({"output": "test"}))
 
-if False:
+if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print(yaml.dump({
-            **{"success": False, "error": 'must provide a command and a subcommand, e.g. "competitions list"'},
-        }, sort_keys=True))
+        print(
+            yaml.dump(
+                {
+                    "status": {
+                        "success": False,
+                        "error": 'must provide a command and a subcommand, e.g. "competitions list"',
+                    },
+                },
+            )
+        )
     else:
         command = sys.argv[1]
         subcommand = sys.argv[2]
@@ -376,10 +417,25 @@ if False:
                 "status": kernel_status,
             },
         }
-        api = authenticate()
+        try:
+            api = authenticate(os.environ)
+        except Exception as e:
+            if DEBUG:
+                raise e
+            print(yaml.dump({"status": {"success": False, "error": str(e)}}))
+
         func = functions[command][subcommand]
+        if DEBUG:
+            print(func)
         success, output, error = func(api, os.environ)
-        print(yaml.dump({"output": {
-            **{"success": success, "error": error},
-            **output
-        }}, sort_keys=True))
+        if DEBUG:
+            pprint(dict(success=success, output=output, error=error))
+        output = output if output is not None else dict()
+        print(
+            yaml.dump(
+                {
+                    **{"status": {"success": success, "error": error}},
+                    **output,
+                },
+            )
+        )
