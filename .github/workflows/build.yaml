@@ -16,6 +16,9 @@ jobs:
     #     repository: onnovalkering/brane
     #     path: ./brane-src
 
+    # - name: Install dependencies
+    #   run: sudo apt-get install -y libpq-dev libssl-dev musl-tools build-essential
+
     - name: Install the brane cli
       run: |
         # sudo apt-get update
@@ -26,6 +29,7 @@ jobs:
           -v "$HOME/.local/bin":/binary \
           onnovalkering/brane-cli \
           -c "cp /brane /binary"
+        ls -lia "$HOME/.local/bin/"
         sudo chown -R $(whoami) "$HOME/.local/bin"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
