@@ -1,0 +1,32 @@
+name: build
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # the container does not provide docker which is a requirement for brane
+    # container:
+    #   image: onnovalkering/brane-cli:latest
+    steps:
+    - uses: actions/checkout@v2
+      
+    # - uses: actions/checkout@v2
+    #   with:
+    #     repository: onnovalkering/brane
+    #     path: ./brane-src
+
+    - name: Install the brane cli
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl, jq
+        curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/onnovalkering/brane/master/contrib/scripts/install-brane-cli.sh | bash
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Build the brane package
+      run: brane build container.yml
+
+    - name: Run example brane script
+      run: |
+        echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | brane repl -c | tail
+         -n 1

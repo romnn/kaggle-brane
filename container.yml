@@ -11,14 +11,17 @@ install:
   - pip3 install kaggle
 
 files:
+  - kaggle_brane/
   - run.py
 
 entrypoint:
   kind: task
   exec: run.py
 
-
 types:
+  # unfortunately, we cannot use types for input because we don't know how to instantiate objects
+  # https://github.com/onnovalkering/brane/blob/master/examples/camelyon/Camelyon.ipynb
+  # is the only example we found online but it does not parse
   KaggleCredentials:
     name: KaggleCredentials
     properties:
@@ -27,35 +30,67 @@ types:
       - name: kaggle_key
         type: string
 
+  # unfortunately, we cannot use CommandStatus in nested outputs
   CommandStatus:
-    name: CommandStatus
+    name: status
     properties:
       - name: error
         type: string
       - name: success
         type: boolean
 
-actions:
-  'debug auth':
-    command:
-      args: [debug, auth]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-    output:
-      - name: status
-        type: CommandStatus
+  DebugAuthOutput:
+    name: DebugAuthOutput
+    properties:
+      - name: error
+        type: string
+      - name: success
+        type: boolean
       - name: kaggle_key
         type: string
       - name: kaggle_username
         type: string
- 
-  'list competitions':
+      # brane wont deserialize this
+      # - name: status
+      #   type: CommandStatus
+
+  DownloadCompetitionOutput:
+    name: DownloadCompetitionOutput
+    properties:
+      - name: error
+        type: string
+      - name: success
+        type: boolean
+      # brane wont deserialize this
+      # - name: status
+      #   type: CommandStatus
+
+actions:
+  debug_auth:
+    command:
+      args: [debug, auth]
+    input:
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+
+    output:
+      - name: output
+        type: DebugAuthOutput
+
+  list_competitions:
     command:
       args: [competitions, list]
     input:
-      - name: credentials
-        type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: competition
         type: string
       - name: group
@@ -93,25 +128,32 @@ actions:
         type: CommandStatus
       - name: output
         type: string
-      
-  'list competition files':
+
+  list_competition_files:
     command:
       args: [competitions, files]
     input:
-      - name: credentials
-        type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: competition
         type: string
     output:
       - name: status
         type: CommandStatus
-      
-  'download competition':
+
+  download_competition:
     command:
       args: [competitions, download]
+    pattern:
+      prefix: download_competition
+      infix:
+        - to
+        - as
     input:
-      - name: credentials
-        type: KaggleCredentials
       - name: competition
         type: string
       - name: destination
@@ -120,6 +162,12 @@ actions:
         default:
           v: unicode
           c: "."
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: force
         type: boolean
         optional: true
@@ -127,15 +175,19 @@ actions:
           v: boolean
           c: false
     output:
-      - name: status
-        type: CommandStatus
+      - name: output
+        type: DownloadCompetitionOutput
 
-  'submit competition':
+  submit_competition:
     command:
       args: [competitions, submit]
     input:
-      - name: credentials
-        type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: filename
         type: string
       - name: competition
@@ -149,25 +201,33 @@ actions:
     output:
       - name: status
         type: CommandStatus
-  
-  'list competition submissions':
+
+  list_competition_submissions:
     command:
       args: [competitions, submissions]
     input:
-      - name: credentials
-        type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: competition
         type: string
     output:
       - name: status
         type: CommandStatus
-  
-  'list competition leaderboard':
+
+  list_competition_leaderboard:
     command:
       args: [competitions, download]
     input:
-      - name: credentials
-        type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: competition
         type: string
       - name: download
@@ -185,13 +245,17 @@ actions:
     output:
       - name: status
         type: CommandStatus
-  
-  'list dataset':
+
+  list_dataset:
     command:
       args: [datasets, list]
     input:
-      - name: credentials
-        type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: sort_by
         type: string
         optional: true
@@ -261,157 +325,209 @@ actions:
     output:
       - name: status
         type: CommandStatus
-  
-  'list dataset files':
+
+  list_dataset_files:
     command:
       args: [datasets, files]
     input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
+      - name: kaggle_username
         type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'download dataset':
-    command:
-      args: [datasets, download]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
+      - name: kaggle_key
         type: string
-    output:
-      - name: status
-        type: CommandStatus
- 
-  'create dataset':
-    command:
-      args: [datasets, create]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'version dataset':
-    command:
-      args: [datasets, version]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'init dataset':
-    command:
-      args: [datasets, init]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'list dataset metadata':
-    command:
-      args: [datasets, metadata]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'list dataset status':
-    command:
-      args: [datasets, status]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'list kernels':
-    command:
-      args: [kernels, list]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'init kernel':
-    command:
-      args: [kernels, init]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'push kernel':
-    command:
-      args: [kernels, push]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-      
-  'pull kernel':
-    command:
-      args: [kernels, pull]
-    input:
-      - name: credentials
-        type: KaggleCredentials
-      - name: competition
-        type: string
-    output:
-      - name: status
-        type: CommandStatus
-  
-  'kernel output':
-    command:
-      args: [kernels, output]
-    input:
-      - name: credentials
-        type: KaggleCredentials
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: competition
         type: string
     output:
       - name: status
         type: CommandStatus
 
-  'kernel status':
+  download_dataset:
+    command:
+      args: [datasets, download]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  create_dataset:
+    command:
+      args: [datasets, create]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  version_dataset:
+    command:
+      args: [datasets, version]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  init_dataset:
+    command:
+      args: [datasets, init]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  list_dataset_metadata:
+    command:
+      args: [datasets, metadata]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  list_dataset_status:
+    command:
+      args: [datasets, status]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  list_kernels:
+    command:
+      args: [kernels, list]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  init_kernel:
+    command:
+      args: [kernels, init]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  push_kernel:
+    command:
+      args: [kernels, push]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  pull_kernel:
+    command:
+      args: [kernels, pull]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  kernel_output:
+    command:
+      args: [kernels, output]
+    input:
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
+      - name: competition
+        type: string
+    output:
+      - name: status
+        type: CommandStatus
+
+  kernel_status:
     command:
       args: [kernels, status]
     input:
-      - name: credentials
-        type: KaggleCredentials
+      - name: kaggle_username
+        type: string
+      - name: kaggle_key
+        type: string
+      # - name: credentials
+      #   type: KaggleCredentials
       - name: competition
         type: string
     output:

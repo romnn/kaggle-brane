@@ -1,0 +1,2 @@
+import kaggle;
+let test := download_competition("test", "./data", "user", "pw", false);
