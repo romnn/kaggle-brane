@@ -4,7 +4,7 @@ on: [ push, pull_request ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     # the container does not provide docker which is a requirement for brane
     # container:
     #   image: onnovalkering/brane-cli:latest
@@ -34,7 +34,10 @@ jobs:
 
     - name: Build brane CLI
       run: |
-        cargo build -v --manifest-path=./brane/Cargo.toml --release --package brane-cli
+        cargo build --manifest-path=./brane/Cargo.toml --release --package brane-cli
+        mkdir -p $HOME/.local/bin
+        cp ./brane/target/release/brane $HOME/.local/bin/brane
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     # - name: Install the brane cli
       # run: |

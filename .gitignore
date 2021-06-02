@@ -3,6 +3,8 @@
 .idea/
 .vscode/
 docker-compose.yml
+Vagrantfile
+.vagrant/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
