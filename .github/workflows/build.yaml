@@ -11,31 +11,47 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       
-    # - uses: actions/checkout@v2
-    #   with:
-    #     repository: onnovalkering/brane
-    #     path: ./brane-src
+    - uses: actions/checkout@v2
+      with:
+        repository: onnovalkering/brane
+        path: ./brane-src
+        fetch-depth: 1
 
     - name: Install dependencies
       run: sudo apt-get install -y libpq-dev libssl-dev musl-tools build-essential
 
-    - name: Install the brane cli
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+          toolchain: 1.52.0
+          # target: x86_64-unknown-linux-musl
+          components: rustfmt, clippy
+          override: true
+
+    - name: Build and install libcassandra
+      run: cd ./brane-src/contrib/datastax && sudo make -j
+
+    - name: Build brane CLI
       run: |
+        cargo build -v --manifest-path=./brane-src/Cargo.toml --release --package brane-cli
+
+    # - name: Install the brane cli
+      # run: |
         # executing the provided installer does not work as the downloaded binary
         # expects glibc 2.32/2.33 which is unavailable for the 20.04 actions base image
         # curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/onnovalkering/brane/master/contrib/scripts/install-brane-cli.sh | bash
 
         # also, copying a binary from the docker image does not work
         # the binary can be executed but somehow crashes and exits with code 1.
-        docker run --rm \
-          --entrypoint "/bin/sh" \
-          -v "$HOME/.local/bin":/binary \
-          onnovalkering/brane-cli \
-          -c "cp /brane /binary"
-        sudo chown -R $(whoami) "$HOME/.local/bin"
-        sudo chmod -R 775 "$HOME/.local/bin"
+        # docker run --rm \
+        #   --entrypoint "/bin/sh" \
+        #   -v "$HOME/.local/bin":/binary \
+        #   onnovalkering/brane-cli \
+        #   -c "cp /brane /binary"
+        # sudo chown -R $(whoami) "$HOME/.local/bin"
+        # sudo chmod -R 775 "$HOME/.local/bin"
         # ls -lia "$HOME/.local/bin/"
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        # echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Build the brane package
       run: |
