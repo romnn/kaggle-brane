@@ -20,7 +20,12 @@ jobs:
       run: |
         # sudo apt-get update
         # sudo apt-get install -y curl, jq
-        curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/onnovalkering/brane/master/contrib/scripts/install-brane-cli.sh | bash
+        # curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/onnovalkering/brane/master/contrib/scripts/install-brane-cli.sh | bash
+        docker run --rm \
+          --entrypoint "/bin/sh" \
+          -v "$HOME/.local/bin":/binary \
+          onnovalkering/brane-cli \
+          -c "cp /brane /binary"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Build the brane package
