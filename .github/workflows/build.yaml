@@ -14,7 +14,8 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: onnovalkering/brane
-        path: ./brane-src
+        # path: ./brane-src
+        path: ./brane
         fetch-depth: 1
 
     - name: Install dependencies
@@ -29,11 +30,11 @@ jobs:
           override: true
 
     - name: Build and install libcassandra
-      run: cd ./brane-src/contrib/datastax && sudo make -j
+      run: cd ./brane/contrib/datastax && sudo make -j
 
     - name: Build brane CLI
       run: |
-        cargo build -v --manifest-path=./brane-src/Cargo.toml --release --package brane-cli
+        cargo build -v --manifest-path=./brane/Cargo.toml --release --package brane-cli
 
     # - name: Install the brane cli
       # run: |
