@@ -26,6 +26,7 @@ jobs:
           -v "$HOME/.local/bin":/binary \
           onnovalkering/brane-cli \
           -c "cp /brane /binary"
+        sudo chown -R $(whoami) "$HOME/.local/bin"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Build the brane package
