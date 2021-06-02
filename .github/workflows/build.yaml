@@ -31,12 +31,14 @@ jobs:
           -c "cp /brane /binary"
         ls -lia "$HOME/.local/bin/"
         sudo chown -R $(whoami) "$HOME/.local/bin"
+        sudo chmod -R 775 "$HOME/.local/bin"
         ls -lia "$HOME/.local/bin/"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Build the brane package
       run: |
         brane
+        brane --help
         brane build container.yml
 
     - name: Run example brane script
