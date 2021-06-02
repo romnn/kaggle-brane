@@ -19,7 +19,7 @@ jobs:
         fetch-depth: 1
 
     - name: Install dependencies
-      run: sudo apt-get install -y libuv-dev libpq-dev libssl-dev musl-tools build-essential
+      run: sudo apt-get install -y libuv1-dev libpq-dev libssl-dev musl-tools build-essential
 
     - name: Install Rust
       uses: actions-rs/toolchain@v1
