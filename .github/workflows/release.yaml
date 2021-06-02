@@ -6,8 +6,8 @@ on:
 jobs:
   publish-package:
     runs-on: ubuntu-latest
-    container:
-      image: onnovalkering/brane-cli:latest
+    # container:
+    #   image: onnovalkering/brane-cli:latest
     steps:
       - uses: actions/checkout@v2
       - uses: docker/setup-qemu-action@v1

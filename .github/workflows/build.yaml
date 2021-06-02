@@ -18,8 +18,8 @@ jobs:
 
     - name: Install the brane cli
       run: |
-        sudo apt-get update
-        sudo apt-get install -y curl, jq
+        # sudo apt-get update
+        # sudo apt-get install -y curl, jq
         curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/onnovalkering/brane/master/contrib/scripts/install-brane-cli.sh | bash
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
