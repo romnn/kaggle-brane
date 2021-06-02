@@ -16,23 +16,25 @@ jobs:
     #     repository: onnovalkering/brane
     #     path: ./brane-src
 
-    # - name: Install dependencies
-    #   run: sudo apt-get install -y libpq-dev libssl-dev musl-tools build-essential
+    - name: Install dependencies
+      run: sudo apt-get install -y libpq-dev libssl-dev musl-tools build-essential
 
     - name: Install the brane cli
       run: |
-        # sudo apt-get update
-        # sudo apt-get install -y curl, jq
+        # executing the provided installer does not work as the downloaded binary
+        # expects glibc 2.32/2.33 which is unavailable for the 20.04 actions base image
         # curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/onnovalkering/brane/master/contrib/scripts/install-brane-cli.sh | bash
+
+        # also, copying a binary from the docker image does not work
+        # the binary can be executed but somehow crashes and exits with code 1.
         docker run --rm \
           --entrypoint "/bin/sh" \
           -v "$HOME/.local/bin":/binary \
           onnovalkering/brane-cli \
           -c "cp /brane /binary"
-        ls -lia "$HOME/.local/bin/"
         sudo chown -R $(whoami) "$HOME/.local/bin"
         sudo chmod -R 775 "$HOME/.local/bin"
-        ls -lia "$HOME/.local/bin/"
+        # ls -lia "$HOME/.local/bin/"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Build the brane package
