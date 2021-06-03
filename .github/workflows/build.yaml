@@ -19,18 +19,15 @@ jobs:
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-      # with:
-      #   install: true
-      #   driver: docker-container
-      #   driver-opts: |
-      #     image=moby/buildkit:master
-      #     network=host
-    
-    - uses: actions/checkout@v2
-      with:
-        repository: onnovalkering/brane
-        path: ./brane
-        fetch-depth: 1
+
+    - name: Install brane CLI
+      uses: romnn/setup-brane-action@master
+      
+    # - uses: actions/checkout@v2
+    #   with:
+    #     repository: onnovalkering/brane
+    #     path: ./brane
+    #     fetch-depth: 1
 
     # - name: Install dependencies
     #   run: sudo apt-get install -y libuv1-dev libpq-dev libssl-dev musl-tools build-essential
@@ -53,23 +50,24 @@ jobs:
     #     cp ./brane/target/release/brane $HOME/.local/bin/brane
     #     echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    - name: Install the brane CLI
-      run: |
+    # - name: Install the brane CLI
+    #   run: |
         # executing the provided installer does not work as the downloaded binary
         # expects glibc 2.32/2.33 which is unavailable for the 20.04 actions base image
         # curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/onnovalkering/brane/master/contrib/scripts/install-brane-cli.sh | bash
 
         # also, copying a binary from the docker image does not work
         # the binary can be executed but somehow crashes and exits with code 1.
-        docker run --rm \
-          --entrypoint "/bin/sh" \
-          -v "$HOME/.local/bin":/binary \
-          onnovalkering/brane-cli \
-          -c "cp /brane /binary"
+
+        # docker run --rm \
+        #   --entrypoint "/bin/sh" \
+        #   -v "$HOME/.local/bin":/binary \
+        #   onnovalkering/brane-cli \
+        #   -c "cp /brane /binary"
         # sudo chown -R $(whoami) "$HOME/.local/bin"
         # sudo chmod -R 775 "$HOME/.local/bin"
         # ls -lia "$HOME/.local/bin/"
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        # echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Build the brane package
       run: |
@@ -78,5 +76,9 @@ jobs:
         sudo $HOME/.local/bin/brane list
 
     - name: Run example brane script
+      shell: bash
+      env:
+        KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+        KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
       run: |
-        (set -o pipefail && echo "import kaggle; let result := download_competition(\"web-traffic-time-series-forecasting\", \"./data\", \"${{ secrets.KAGGLE_USERNAME }}\", \"${{ secrets.KAGGLE_KEY }}\", false); result.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
+        (set -o pipefail && echo "import kaggle; let result := download_competition(\"web-traffic-time-series-forecasting\", \"./data\", \"$KAGGLE_USERNAME\", \"$KAGGLE_KEY\", false); result.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
