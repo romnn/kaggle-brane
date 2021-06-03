@@ -70,11 +70,9 @@ jobs:
     - name: Build the brane package
       run: |
         sudo docker buildx create --use
-        # sleep 15
-        sudo $HOME/.local/bin/brane --debug build container.yml
+        sudo $HOME/.local/bin/brane build container.yml
         sudo $HOME/.local/bin/brane list
-
 
     - name: Run example brane script
       run: |
-        (set -o pipefail && echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane repl -c | tail -n 1)
+        (set -o pipefail && echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
