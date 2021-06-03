@@ -3,28 +3,32 @@ name: build
 on: [ push, pull_request ]
 
 jobs:
+  import:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
   build:
     runs-on: ubuntu-20.04
-    # the container does not provide docker which is a requirement for brane
-    # container:
-    #   image: onnovalkering/brane-cli:latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-      with:
-        install: true
-        driver: docker-container
-        driver-opts: |
-          image=moby/buildkit:master
-          network=host
+      # with:
+      #   install: true
+      #   driver: docker-container
+      #   driver-opts: |
+      #     image=moby/buildkit:master
+      #     network=host
     
     - uses: actions/checkout@v2
       with:
         repository: onnovalkering/brane
-        # path: ./brane-src
         path: ./brane
         fetch-depth: 1
 
@@ -75,4 +79,4 @@ jobs:
 
     - name: Run example brane script
       run: |
-        (set -o pipefail && echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
+        (set -o pipefail && echo "import kaggle; let result := download_competition(\"web-traffic-time-series-forecasting\", \"./data\", \"${{ secrets.KAGGLE_USERNAME }}\", \"${{ secrets.KAGGLE_KEY }}\", false); result.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
