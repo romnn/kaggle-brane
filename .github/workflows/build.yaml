@@ -30,8 +30,8 @@ jobs:
 
     - name: Run example brane script
       shell: bash
-      env:
-        KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-        KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      # env:
+      #   KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      #   KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
       run: |
-        (set -o pipefail && echo "import kaggle; let result := download_competition(\"web-traffic-time-series-forecasting\", \"./data\", \"$KAGGLE_USERNAME\", \"$KAGGLE_KEY\", false); result.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
+        (set -o pipefail && echo "import kaggle; let result := download_competition(\"web-traffic-time-series-forecasting\", \"./data\", \"username\", \"password\", false); result.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
