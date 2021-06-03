@@ -13,27 +13,50 @@ Furthermore, if you attempt to interact with a specific competition (e.g. downlo
 
 #### Usage
 
-First, import the brain package so that you can use it in the REPL:
+First, import the brain package from this repository:
 ```bash
 brane import romnn/kaggle-brane
+```
+
+You also need to push the package to be able to import it in your remote session or jupyterlab notebook:
+```bash
 brane push kaggle 1.0.0
 ```
 
-Subsequently, the `kaggle` can be imported in your brane scripts to interact with kaggle
+Subsequently, the `kaggle` package can be imported in your brane scripts to interact with kaggle.
+You can try it out with the `brane --debug repl` as well:
 ```python
 import kaggle;
+let test := download_competition("comp-name", "./data", "kaggle_username", "kaggle_key", false, true);
 ```
+
+#### Documentation
+
+At the moment, only `download_competition` is considered production ready, but more API calls have been implemented to cover the full Kaggle API for an easy integration with your brane projects.
+
+The easiest way to learn about the available functions, parameters and return types, is to explore the package with
+```bash
+brane --debug test kaggle
+```
+after you imported it.
+
+This will give you a list of all the available functions and show you the parameters in the order they are expected. When you supply valid credentials and the desired parameters  you will be able so see the output of the function.
 
 #### Local development
 
+It is recommended to develop locally by using environment variables and the `run.py` python script. This will use the Kaggle API with your local kaggle credentials at `~/.kaggle/kaggle.json` if available 
+
 ```bash
-# this will use the kaggle API with your local kaggle credentials at ~/.kaggle/kaggle.json if available 
 COMPETITION=web-traffic-time-series-forecasting DESTINATION=. ./run.py competitions download
 ```
 
 #### Build the brane package
 
+After local development, you can build and push the brane package with the included `Makefile` command:
 ```bash
-brane remove kaggle && brane build container.yml
-brane test kaggle
+make build
+
+# check that the package was updated and test it
+brane list
+brane --debug test kaggle
 ```

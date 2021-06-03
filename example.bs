@@ -1,2 +1,2 @@
 import kaggle;
-let test := download_competition("test", "./data", "user", "pw", false);
+let test := download_competition("comp-name", "./data", "kaggle_username", "kaggle_key", false, true);

@@ -18,7 +18,7 @@ jobs:
       shell: bash
       run: |
         sudo $HOME/.local/bin/brane import romnn/kaggle-brane
-        (set -o pipefail && echo "import kaggle;" | sudo $HOME/.local/bin/brane --debug repl -c)
+        (set -o pipefail && echo "import kaggle;" | sudo $HOME/.local/bin/brane repl -c)
 
   build:
     runs-on: ubuntu-20.04
@@ -43,4 +43,4 @@ jobs:
       #   KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
       #   KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
       run: |
-        (set -o pipefail && echo "import kaggle; let result := download_competition(\"web-traffic-time-series-forecasting\", \"./data\", \"username\", \"password\", false); result.success;" | sudo $HOME/.local/bin/brane --debug repl -c | tail -n 1)
+        (set -o pipefail && echo "import kaggle; let result := download_competition(\"web-traffic-time-series-forecasting\", \"./data\", \"username\", \"password\", false, true); result.success;" | sudo $HOME/.local/bin/brane repl -c | tail -n 1)
