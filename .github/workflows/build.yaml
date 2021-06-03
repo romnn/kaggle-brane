@@ -56,16 +56,20 @@ jobs:
           -v "$HOME/.local/bin":/binary \
           onnovalkering/brane-cli \
           -c "cp /brane /binary"
-        sudo chown -R $(whoami) "$HOME/.local/bin"
-        sudo chmod -R 775 "$HOME/.local/bin"
-        ls -lia "$HOME/.local/bin/"
+        # sudo chown -R $(whoami) "$HOME/.local/bin"
+        # sudo chmod -R 775 "$HOME/.local/bin"
+        # ls -lia "$HOME/.local/bin/"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Build the brane package
       run: |
         brane --help
         docker ps
-        brane --debug build container.yml
+        sudo groupadd docker
+        sudo usermod -aG docker $USER
+        newgrp docker
+        sudo $HOME/.local/bin/brane --debug build container.yml
+
 
     - name: Run example brane script
       run: |
