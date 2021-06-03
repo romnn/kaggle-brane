@@ -65,7 +65,7 @@ jobs:
       run: |
         brane --help
         docker ps
-        sudo brane build container.yml
+        sudo brane --debug build container.yml
 
     - name: Run example brane script
       run: |
