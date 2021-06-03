@@ -67,7 +67,9 @@ jobs:
         docker ps
         sudo usermod -aG docker $USER
         newgrp docker
-        sudo $HOME/.local/bin/brane --debug build container.yml
+        docker buildx create --use
+        brane --debug build container.yml
+        # sudo $HOME/.local/bin/brane --debug build container.yml
 
 
     - name: Run example brane script
