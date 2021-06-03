@@ -69,19 +69,12 @@ jobs:
 
     - name: Build the brane package
       run: |
-        brane --help
-        # sudo usermod -aG docker $USER
-        # newgrp docker
-        docker version
-        docker ps
         sudo docker buildx create --use
-        sleep 15
-        sudo docker ps
-        # brane --debug build container.yml
+        # sleep 15
         sudo $HOME/.local/bin/brane --debug build container.yml
         sudo $HOME/.local/bin/brane list
 
 
     - name: Run example brane script
       run: |
-        echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane repl -c | tail -n 1
+        (set -o pipefail && echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane repl -c | tail -n 1)
