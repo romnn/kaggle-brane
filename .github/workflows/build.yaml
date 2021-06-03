@@ -21,12 +21,12 @@ jobs:
           image=moby/buildkit:master
           network=host
     
-    # - uses: actions/checkout@v2
-    #   with:
-    #     repository: onnovalkering/brane
-    #     # path: ./brane-src
-    #     path: ./brane
-    #     fetch-depth: 1
+    - uses: actions/checkout@v2
+      with:
+        repository: onnovalkering/brane
+        # path: ./brane-src
+        path: ./brane
+        fetch-depth: 1
 
     # - name: Install dependencies
     #   run: sudo apt-get install -y libuv1-dev libpq-dev libssl-dev musl-tools build-essential
@@ -79,9 +79,10 @@ jobs:
         sudo docker ps
         # brane --debug build container.yml
         sudo $HOME/.local/bin/brane --debug build container.yml
+        sudo $HOME/.local/bin/brane list
 
 
     - name: Run example brane script
       run: |
-        echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | brane repl -c | tail
+        echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane repl -c | tail
          -n 1
