@@ -100,7 +100,7 @@ def test_list_competitions(api) -> None:
 def test_download_competitions(api) -> None:
     comp = "test-comp"
     with tempfile.TemporaryDirectory(prefix="kaggle-challenge") as dest:
-        env = dict(COMPETITION=comp, DESTINATION=dest)
+        env = dict(COMPETITION=comp, DESTINATION=dest, UNZIP="False")
         success, output, error = kb.download_competition(api, env)
         print("success:", success)
         print("output:", output)
