@@ -1,4 +1,7 @@
+# import shutil
+import zipfile
 import json
+import io
 import os
 import traceback
 from functools import wraps
@@ -87,20 +90,41 @@ def list_competition_files(api, env):
 
 @wrap_error
 def download_competition(api, env):
-    competition = env.get("COMPETITION")
-    if competition is None:
+    comp = env.get("COMPETITION")
+    if comp is None:
         raise ValueError("must specify competition")
     # optional
     dest = os.path.realpath(env.get("DESTINATION", "."))
     force = _is_set(env.get("FORCE", ""))
+    unzip = _is_set(env.get("UNZIP", "true"))
     quiet = _is_set(env.get("QUIET", ""))
     quiet = True
     if DEBUG:
         print(
-            "downloading %s to %s (force=%s quiet=%s)"
-            % (competition, dest, force, quiet)
+            "downloading %s to %s (force=%s, unzip=%s quiet=%s)"
+            % (comp, dest, force, unzip, quiet)
         )
-    api.competition_download_files(competition, path=dest, force=force, quiet=quiet)
+    api.competition_download_files(comp, path=dest, force=force, quiet=quiet)
+    assert comp + ".zip" in os.listdir(dest)
+    if unzip:
+        # recursively unzip the files
+        archive = os.path.join(dest, comp + ".zip")
+        # to put all files into a subfolder, unarchived can be used instead of dest
+        # unarchived = os.path.join(dest, comp)
+        # os.makedirs(unarchived, exist_ok=True)
+        _extract(archive, dest)
+
+
+def _extract(filename, dest):
+    z = zipfile.ZipFile(filename)
+    for f in z.namelist():
+        dirname = os.path.splitext(f)[0]
+        unarchived = os.path.join(dest, dirname)
+        os.makedirs(unarchived, exist_ok=True)
+        content = io.BytesIO(z.read(f))
+        zip_file = zipfile.ZipFile(content)
+        for ff in zip_file.namelist():
+            zip_file.extract(ff, unarchived)
 
 
 @wrap_error
