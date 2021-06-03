@@ -72,9 +72,10 @@ jobs:
         brane --help
         # sudo usermod -aG docker $USER
         # newgrp docker
-        # docker buildx create --use
         docker ps
+        docker buildx create --use
         sleep 15
+        docker ps
         # brane --debug build container.yml
         sudo $HOME/.local/bin/brane --debug build container.yml
 
