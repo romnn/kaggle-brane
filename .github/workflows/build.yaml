@@ -65,11 +65,11 @@ jobs:
       run: |
         brane --help
         docker ps
-        sudo usermod -aG docker $USER
-        newgrp docker
+        # sudo usermod -aG docker $USER
+        # newgrp docker
         docker buildx create --use
-        brane --debug build container.yml
-        # sudo $HOME/.local/bin/brane --debug build container.yml
+        # brane --debug build container.yml
+        sudo $HOME/.local/bin/brane --debug build container.yml
 
 
     - name: Run example brane script
