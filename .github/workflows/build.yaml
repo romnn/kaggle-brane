@@ -84,5 +84,4 @@ jobs:
 
     - name: Run example brane script
       run: |
-        echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane repl -c | tail
-         -n 1
+        echo "import kaggle; let test := download_competition(\"test\", \"./data\", \"user\", \"pw\", false); test.success;" | sudo $HOME/.local/bin/brane repl -c | tail -n 1
