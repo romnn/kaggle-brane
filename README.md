@@ -1,5 +1,6 @@
-## Kaggle package for brane
+## Kaggle for brane
 
+This [brane](https://github.com/onnovalkering/brane) package provides wrappers for the [Kaggle](https://www.kaggle.com/) API for easy interaction when working with data pipelines and machine learning models in `brane`.
 
 #### Prerequisites
 
@@ -23,7 +24,7 @@ You also need to push the package to be able to import it in your remote session
 brane push kaggle 1.0.0
 ```
 
-Subsequently, the `kaggle` package can be imported in your brane scripts to interact with kaggle.
+Subsequently, the `kaggle` package can be imported in your `brane` scripts to interact with kaggle.
 You can try it out with the `brane --debug repl` as well:
 ```python
 import kaggle;
@@ -32,7 +33,7 @@ let test := download_competition("comp-name", "./data", "kaggle_username", "kagg
 
 #### Documentation
 
-At the moment, only `download_competition` is considered production ready, but more API calls have been implemented to cover the full Kaggle API for an easy integration with your brane projects.
+At the moment, only `download_competition` is considered production ready, but more API calls have been implemented to cover the full Kaggle API for an easy integration with your `brane` projects.
 
 The easiest way to learn about the available functions, parameters and return types, is to explore the package with
 ```bash
@@ -52,7 +53,7 @@ COMPETITION=web-traffic-time-series-forecasting DESTINATION=. ./run.py competiti
 
 #### Build the brane package
 
-After local development, you can build and push the brane package with the included `Makefile` command:
+After local development, you can build and push the `brane` package with the included `Makefile` command:
 ```bash
 make build
 
